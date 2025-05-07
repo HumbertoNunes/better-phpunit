@@ -15,6 +15,7 @@ module.exports = class PhpUnitCommand {
 
         this.lastOutput;
         this.isPest = this._isPest();
+        this.isClassBasedTest = this._isClassBasedTest();
     }
 
     get output() {
@@ -101,7 +102,7 @@ module.exports = class PhpUnitCommand {
 
         while (line > 0) {
             const lineText = vscode.window.activeTextEditor.document.lineAt(line).text;
-            const match = this.isPest ?
+            const match = this.isPest && !this.isClassBasedTest ?
                 lineText.match(/^\s*(?:it|test)\(([^,)]+)/m) :
                 lineText.match(/^\s*(?:public|private|protected)?\s*function\s*(\w+)\s*\(.*$/);
 
@@ -134,5 +135,12 @@ module.exports = class PhpUnitCommand {
         return path
             .replace(/\\/g, '/') // Convert backslashes from windows paths to forward slashes, otherwise the shell will ignore them.
             .replace(/ /g, '\\ '); // Escape spaces.
+    }
+
+    _isClassBasedTest() {
+        const document = vscode.window.activeTextEditor.document;
+        const content = document.getText();
+        
+        return content.match(/class\s+\w+\s+extends\s+TestCase/);
     }
 }
