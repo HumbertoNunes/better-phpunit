@@ -98,7 +98,15 @@ module.exports = class PhpUnitCommand {
 
     get method() {
         let line = vscode.window.activeTextEditor.selection.active.line;
+        let nextLine = vscode.window.activeTextEditor.document.lineAt(line + 1).text;
         let method;
+
+        const isCursorInsideMethod = nextLine.match(/^\s*(?:public|private|protected)?\s*function\s*\w+\s*\(/) ||
+                                     nextLine.match(/^\s*#\[Test\]/);
+
+        if (isCursorInsideMethod) {
+            return null;
+        }
 
         while (line > 0) {
             const lineText = vscode.window.activeTextEditor.document.lineAt(line).text;
